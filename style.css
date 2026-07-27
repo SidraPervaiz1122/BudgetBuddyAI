@@ -1,0 +1,28 @@
+.main {
+    background-color: #0f172a;
+}
+
+.stButton>button {
+    width:100%;
+    background:linear-gradient(90deg,#22c55e,#3b82f6);
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:12px;
+    font-weight:bold;
+}
+
+.stButton>button:hover{
+    transform:scale(1.03);
+}
+
+.card{
+    background:#1e293b;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0px 5px 20px rgba(0,0,0,.3);
+}
+
+h1,h2,h3{
+    color:white;
+}
