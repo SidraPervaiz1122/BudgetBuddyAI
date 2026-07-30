@@ -11,7 +11,7 @@ from datetime import date
 import streamlit as st
 
 from database.db import add_expense, get_user_expenses, update_expense, delete_expense
-from utils.helpers import format_currency
+from utils.helpers import format_currency, clear_data_cache
 from components.sidebar import render_sidebar
 from components.navbar import render_navbar
 
@@ -132,6 +132,7 @@ with st.form("add_expense_form", clear_on_submit=True):
             )
 
             if success:
+                clear_data_cache()
                 st.success(f"✅ {message} {CATEGORY_ICONS.get(category, '')} {category} - Rs. {amount:,.2f}")
             else:
                 st.error(f"❌ {message}")
@@ -216,6 +217,7 @@ else:
                             )
                             if success:
                                 st.session_state.editing_expense_id = None
+                                clear_data_cache()
                                 st.success(f"✅ {message}")
                                 st.rerun()
                             else:
@@ -249,6 +251,7 @@ else:
                             success, message = delete_expense(exp_id, user_id=user_id)
                             st.session_state[confirm_key] = False
                             if success:
+                                clear_data_cache()
                                 st.success(f"✅ {message}")
                             else:
                                 st.error(f"❌ {message}")

@@ -5,13 +5,16 @@ BudgetBuddy AI - Database Layer
 ---------------------------------
 This module manages all interactions with the SQLite database (expenses.db),
 including schema creation/migration, user authentication (with bcrypt
-password hashing), and full CRUD operations for expenses.
+password hashing), password reset codes, and full CRUD operations for
+expenses.
 """
 
 import os
 import sqlite3
 import bcrypt
-from datetime import datetime
+import random
+import string
+from datetime import datetime, timedelta
 from contextlib import contextmanager
 
 # ----------------------------------------------------------------------------
@@ -37,6 +40,12 @@ _EXPECTED_SCHEMA = {
         "description": "TEXT",
         "date": "TEXT NOT NULL DEFAULT ''",
         "created_at": "TEXT NOT NULL DEFAULT ''",
+    },
+    "password_resets": {
+        "email": "TEXT PRIMARY KEY",
+        "code_hash": "TEXT NOT NULL DEFAULT ''",
+        "expires_at": "TEXT NOT NULL DEFAULT ''",
+        "attempts": "INTEGER NOT NULL DEFAULT 0",
     },
 }
 
@@ -123,6 +132,15 @@ def create_tables():
                 )
             """)
 
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS password_resets (
+                    email TEXT PRIMARY KEY,
+                    code_hash TEXT NOT NULL,
+                    expires_at TEXT NOT NULL,
+                    attempts INTEGER NOT NULL DEFAULT 0
+                )
+            """)
+
             conn.commit()
             _migrate_schema(conn)
             conn.commit()
@@ -194,6 +212,140 @@ def login_user(email, password):
 
     except sqlite3.Error as e:
         return False, f"Database error during login: {e}", None
+
+
+# ----------------------------------------------------------------------------
+# Password reset
+# ----------------------------------------------------------------------------
+
+def get_user_by_email(email):
+    """
+    Returns {"id", "name", "email"} for the given email, or None if no
+    account exists with that address.
+    """
+    if not email:
+        return None
+
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT id, name, email FROM users WHERE email = ?",
+                (email.strip().lower(),),
+            )
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] Failed to fetch user by email: {e}")
+        return None
+
+
+def create_password_reset_code(email):
+    """
+    Generates a 6-digit numeric code, stores its bcrypt hash with a 10-minute
+    expiry against the given email, and returns the plaintext code so it can
+    be emailed to the user (it is never stored in plaintext).
+    """
+    email = email.strip().lower()
+    code = "".join(random.choices(string.digits, k=6))
+    code_hash = bcrypt.hashpw(code.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    expires_at = (datetime.utcnow() + timedelta(minutes=10)).isoformat()
+
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO password_resets (email, code_hash, expires_at, attempts)
+                VALUES (?, ?, ?, 0)
+                ON CONFLICT(email) DO UPDATE SET
+                    code_hash = excluded.code_hash,
+                    expires_at = excluded.expires_at,
+                    attempts = 0
+                """,
+                (email, code_hash, expires_at),
+            )
+            conn.commit()
+
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] Failed to create password reset code: {e}")
+
+    return code
+
+
+def verify_password_reset_code(email, code):
+    """
+    Checks a submitted code against the stored hash for this email.
+
+    Returns (is_valid: bool, reason: str) where reason is one of:
+        "ok"        - code is correct and still valid
+        "not_found" - no reset code was ever requested for this email
+        "expired"   - the code existed but its 10-minute window passed
+        "locked"    - too many wrong guesses against this code (max 5)
+        "invalid"   - code exists, hasn't expired, but doesn't match
+        "error"     - a database error occurred
+    """
+    email = email.strip().lower()
+
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM password_resets WHERE email = ?", (email,))
+            row = cursor.fetchone()
+
+            if row is None:
+                return False, "not_found"
+
+            if row["attempts"] >= 5:
+                return False, "locked"
+
+            if datetime.utcnow() > datetime.fromisoformat(row["expires_at"]):
+                return False, "expired"
+
+            is_valid = bcrypt.checkpw(code.encode("utf-8"), row["code_hash"].encode("utf-8"))
+
+            if not is_valid:
+                cursor.execute(
+                    "UPDATE password_resets SET attempts = attempts + 1 WHERE email = ?",
+                    (email,),
+                )
+                conn.commit()
+                return False, "invalid"
+
+            return True, "ok"
+
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] Failed to verify password reset code: {e}")
+        return False, "error"
+
+
+def reset_user_password(email, new_password):
+    """
+    Hashes and updates the user's password, then clears the used reset code.
+    Returns (success: bool, message: str).
+    """
+    email = email.strip().lower()
+
+    if not new_password or len(new_password) < 8:
+        return False, "Password must be at least 8 characters long."
+
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+            if cursor.fetchone() is None:
+                return False, "No account found with that email."
+
+            new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+            cursor.execute("UPDATE users SET password = ? WHERE email = ?", (new_hash, email))
+            cursor.execute("DELETE FROM password_resets WHERE email = ?", (email,))
+            conn.commit()
+
+            return True, "Your password has been updated."
+
+    except sqlite3.Error as e:
+        return False, f"Database error while resetting password: {e}"
 
 
 # ----------------------------------------------------------------------------

@@ -22,25 +22,26 @@ EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
 
 # ----------------------------------------------------------------------------
-# Styling
+# Styling (original palette restored, no external font fetch)
 # ----------------------------------------------------------------------------
 
 st.markdown(
     """
     <style>
-        .signup-header {
-            text-align: center;
-            padding-bottom: 10px;
+        .block-container { max-width: 460px; padding-top: 3rem; }
+
+        .auth-brand { text-align: center; padding-bottom: 10px; }
+        .auth-logo-badge {
+            width: 56px; height: 56px; margin: 0 auto 10px auto;
+            border-radius: 16px;
+            background: linear-gradient(90deg, #16a34a, #22c55e);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
         }
-        .signup-header h1 {
-            font-size: 2.2rem;
-            margin-bottom: 0;
-        }
-        .signup-header p {
-            color: #8a8a8a;
-            font-size: 1rem;
-            margin-top: 4px;
-        }
+        .auth-brand h1 { font-size: 2.2rem; margin-bottom: 0; }
+        .auth-brand p { color: #8a8a8a; font-size: 1rem; margin-top: 4px; }
+
         div[data-testid="stForm"] {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(150, 150, 150, 0.15);
@@ -48,7 +49,10 @@ st.markdown(
             padding: 2rem 2rem 1rem 2rem;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
-        div.stButton > button {
+
+        .stTextInput input { border-radius: 10px !important; }
+
+        div.stButton > button, div.stFormSubmitButton > button {
             width: 100%;
             border-radius: 10px;
             padding: 0.6rem 0;
@@ -57,10 +61,17 @@ st.markdown(
             color: white;
             border: none;
         }
-        div.stButton > button:hover {
+        div.stButton > button:hover, div.stFormSubmitButton > button:hover {
             background: linear-gradient(90deg, #15803d, #16a34a);
             color: white;
         }
+
+        .secondary-btn button {
+            background: rgba(150, 150, 150, 0.08) !important;
+            border: 1px solid rgba(150, 150, 150, 0.25) !important;
+            box-shadow: none !important;
+        }
+        .secondary-btn button:hover { background: rgba(150, 150, 150, 0.15) !important; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -73,7 +84,8 @@ st.markdown(
 
 st.markdown(
     """
-    <div class="signup-header">
+    <div class="auth-brand">
+        <div class="auth-logo-badge">✨</div>
         <h1>💰 BudgetBuddy AI</h1>
         <p>✨ Create your account and take control of your finances</p>
     </div>
@@ -115,8 +127,8 @@ with st.form("signup_form", clear_on_submit=False):
             st.error("⚠️ Passwords do not match. Please try again.")
 
         else:
-            # --- Attempt registration ---
-            success, message = register_user(name.strip(), email.strip(), password)
+            with st.spinner("Creating your account..."):
+                success, message = register_user(name.strip(), email.strip(), password)
 
             if success:
                 st.success(f"✅ {message} You can now log in. 🎉")
@@ -134,5 +146,7 @@ st.markdown("<div style='text-align:center;'>Already have an account?</div>", un
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
+    st.markdown("<div class='secondary-btn'>", unsafe_allow_html=True)
     if st.button("🔑 Go to Login"):
         st.switch_page("pages/login.py")
+    st.markdown("</div>", unsafe_allow_html=True)

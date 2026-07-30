@@ -1,11 +1,12 @@
 """
 cards.py
 
-BudgetBuddy AI - Dashboard Cards
+BudgetBuddy AI - Dashboard Stat Cards
 ------------------------------------
-Reusable, styled metric cards for the dashboard: Total Budget, Total
-Expenses, Remaining Budget, and Savings. Each card shows an icon, a
-large headline number, and a small descriptive subtitle.
+Reusable, premium metric cards for the dashboard: Total Budget, Total
+Expenses, Remaining Budget, Savings, and Number of Expenses. Each card
+shows an icon, a large headline number, a small descriptive subtitle, a
+colored accent border, and a subtle hover lift animation.
 
 Usage:
     from cards import render_dashboard_cards
@@ -15,6 +16,7 @@ Usage:
         total_expenses=32500,
         remaining_budget=17500,
         savings_percentage=35.0,
+        expense_count=18,
     )
 """
 
@@ -22,14 +24,15 @@ import streamlit as st
 from utils.helpers import format_currency
 
 # ----------------------------------------------------------------------------
-# Card style definitions
+# Card theme definitions - accent color + soft icon-badge background per card
 # ----------------------------------------------------------------------------
 
 _CARD_THEMES = {
-    "budget": {"gradient": "linear-gradient(135deg, #2563eb, #3b82f6)", "glow": "rgba(37, 99, 235, 0.35)"},
-    "expense": {"gradient": "linear-gradient(135deg, #dc2626, #f87171)", "glow": "rgba(220, 38, 38, 0.35)"},
-    "remaining": {"gradient": "linear-gradient(135deg, #0891b2, #22d3ee)", "glow": "rgba(8, 145, 178, 0.35)"},
-    "savings": {"gradient": "linear-gradient(135deg, #16a34a, #4ade80)", "glow": "rgba(22, 163, 74, 0.35)"},
+    "budget":    {"accent": "#2563eb", "badge_bg": "rgba(37, 99, 235, 0.12)"},
+    "expense":   {"accent": "#dc2626", "badge_bg": "rgba(220, 38, 38, 0.12)"},
+    "remaining": {"accent": "#0891b2", "badge_bg": "rgba(8, 145, 178, 0.12)"},
+    "savings":   {"accent": "#16a34a", "badge_bg": "rgba(22, 163, 74, 0.12)"},
+    "count":     {"accent": "#7c3aed", "badge_bg": "rgba(124, 58, 237, 0.12)"},
 }
 
 
@@ -39,33 +42,44 @@ def _inject_card_styles():
         """
         <style>
             .bb-card {
-                border-radius: 16px;
-                padding: 1.25rem 1.4rem;
-                color: #ffffff;
-                min-height: 130px;
+                background: #ffffff;
+                border-radius: 18px;
+                padding: 1.2rem 1.3rem;
+                min-height: 128px;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-                transition: transform 0.15s ease-in-out;
+                box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+                border: 1px solid rgba(15, 23, 42, 0.05);
+                border-left: 4px solid var(--bb-accent, #2563eb);
+                transition: transform 0.18s ease, box-shadow 0.18s ease;
             }
             .bb-card:hover {
-                transform: translateY(-3px);
+                transform: translateY(-4px);
+                box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
             }
             .bb-card-icon {
-                font-size: 1.6rem;
-                opacity: 0.9;
+                width: 38px; height: 38px;
+                border-radius: 10px;
+                background: var(--bb-badge-bg, rgba(37,99,235,0.12));
+                display: flex; align-items: center; justify-content: center;
+                font-size: 1.15rem;
             }
             .bb-card-value {
-                font-size: 1.9rem;
-                font-weight: 700;
-                margin: 0.35rem 0 0.1rem 0;
+                font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+                font-weight: 800;
+                color: #0f172a;
+                margin: 0.55rem 0 0.1rem 0;
                 line-height: 1.1;
+                overflow-wrap: break-word;
             }
             .bb-card-subtitle {
-                font-size: 0.8rem;
-                opacity: 0.85;
-                font-weight: 400;
+                font-size: clamp(0.72rem, 1.4vw, 0.8rem);
+                color: #64748b;
+                font-weight: 500;
+            }
+            @media (max-width: 640px) {
+                .bb-card { min-height: 108px; padding: 1rem 1.05rem; }
             }
         </style>
         """,
@@ -81,15 +95,14 @@ def render_card(icon, value, subtitle, theme="budget"):
         icon (str): Emoji or icon representing the metric.
         value (str): The large headline value to display (pre-formatted).
         subtitle (str): A short descriptive label under the value.
-        theme (str): One of "budget", "expense", "remaining", "savings" -
-            controls the card's gradient color scheme.
+        theme (str): One of "budget", "expense", "remaining", "savings",
+            "count" - controls the card's accent color.
     """
     style = _CARD_THEMES.get(theme, _CARD_THEMES["budget"])
 
     st.markdown(
         f"""
-        <div class="bb-card" style="background:{style['gradient']};
-             box-shadow: 0 10px 25px {style['glow']};">
+        <div class="bb-card" style="--bb-accent:{style['accent']}; --bb-badge-bg:{style['badge_bg']};">
             <div class="bb-card-icon">{icon}</div>
             <div>
                 <div class="bb-card-value">{value}</div>
@@ -101,22 +114,26 @@ def render_card(icon, value, subtitle, theme="budget"):
     )
 
 
-def render_dashboard_cards(total_budget, total_expenses, remaining_budget, savings_percentage):
+def render_dashboard_cards(total_budget, total_expenses, remaining_budget, savings_percentage, expense_count=None):
     """
-    Renders the four core BudgetBuddy AI dashboard cards side by side:
-    Total Budget, Total Expenses, Remaining Budget, and Savings.
+    Renders the core BudgetBuddy AI dashboard cards side by side: Total
+    Budget, Total Expenses, Remaining Budget, and Savings. Pass
+    `expense_count` to additionally show a 5th "Expenses Logged" card;
+    leave it as None (default) to render exactly the 4 standard cards.
 
     Args:
         total_budget (float): The user's total/monthly budget.
         total_expenses (float): Total amount spent so far.
         remaining_budget (float): Budget remaining (can be negative).
         savings_percentage (float): Percentage of budget saved.
+        expense_count (int | None): Optional number of expense transactions.
     """
     _inject_card_styles()
 
-    col1, col2, col3, col4 = st.columns(4)
+    num_cards = 5 if expense_count is not None else 4
+    cols = st.columns(num_cards)
 
-    with col1:
+    with cols[0]:
         render_card(
             icon="💰",
             value=format_currency(total_budget),
@@ -124,7 +141,7 @@ def render_dashboard_cards(total_budget, total_expenses, remaining_budget, savin
             theme="budget",
         )
 
-    with col2:
+    with cols[1]:
         render_card(
             icon="💸",
             value=format_currency(total_expenses),
@@ -132,7 +149,7 @@ def render_dashboard_cards(total_budget, total_expenses, remaining_budget, savin
             theme="expense",
         )
 
-    with col3:
+    with cols[2]:
         remaining_label = "Remaining Budget" if remaining_budget >= 0 else "Over Budget"
         render_card(
             icon="💵",
@@ -141,10 +158,19 @@ def render_dashboard_cards(total_budget, total_expenses, remaining_budget, savin
             theme="remaining",
         )
 
-    with col4:
+    with cols[3]:
         render_card(
             icon="🎯",
             value=f"{savings_percentage:.1f}%",
             subtitle="Savings",
             theme="savings",
         )
+
+    if expense_count is not None:
+        with cols[4]:
+            render_card(
+                icon="🧾",
+                value=str(expense_count),
+                subtitle="Expenses Logged",
+                theme="count",
+            )
