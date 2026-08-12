@@ -1,11 +1,13 @@
 """
 navbar.py
 
-BudgetBuddy AI - Top Navigation Bar
+BudgetBuddy AI - Top Header Bar
 ----------------------------------------
-A clean, dark, modern top bar shown on every page. Displays the current
-page title, today's date, a user avatar (initials-based), and a
-notifications icon with an optional unread-count badge.
+A clean, light, premium SaaS-style header shown on every page (matching
+the Stripe/Linear/Vercel-inspired design direction) - page title, a
+time-aware greeting, today's date, a notifications bell, and a user
+avatar. The main content area stays bright and spacious; only the
+Sidebar keeps the dark theme.
 
 Usage:
     from navbar import render_navbar
@@ -28,17 +30,31 @@ def _get_initials(name):
     return (parts[0][0] + parts[-1][0]).upper()
 
 
+def _get_greeting(name):
+    """Time-aware greeting, e.g. 'Good morning, Sidra 👋'."""
+    hour = datetime.now().hour
+    if hour < 12:
+        time_phrase = "Good morning"
+    elif hour < 17:
+        time_phrase = "Good afternoon"
+    else:
+        time_phrase = "Good evening"
+    first_name = (name or "there").strip().split(" ")[0]
+    return f"{time_phrase}, {first_name} 👋"
+
+
 def render_navbar(page_title="Dashboard", user_name="Guest", notifications_count=0):
     """
-    Renders the top navigation bar.
+    Renders the top header bar.
 
     Args:
         page_title (str): Title of the currently active page.
-        user_name (str): Name of the logged-in user (used for the avatar).
+        user_name (str): Name of the logged-in user (used for the greeting/avatar).
         notifications_count (int): Number of unread notifications to badge.
     """
     today_str = datetime.now().strftime("%A, %d %B %Y")
     initials = _get_initials(user_name)
+    greeting = _get_greeting(user_name)
 
     badge_html = ""
     if notifications_count and notifications_count > 0:
@@ -51,57 +67,80 @@ def render_navbar(page_title="Dashboard", user_name="Guest", notifications_count
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                background: #111827;
-                border: 1px solid rgba(255, 255, 255, 0.06);
-                border-radius: 14px;
-                padding: 0.9rem 1.4rem;
-                margin-bottom: 1.4rem;
-                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+                background: var(--bb-card, #FFFFFF);
+                border: 1px solid var(--bb-border, #E2E8F0);
+                border-radius: 16px;
+                padding: 1.1rem 1.5rem;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
             }
             .bb-nav-left h3 {
-                color: #ffffff;
+                color: var(--bb-text, #1E293B);
                 margin: 0;
-                font-size: 1.25rem;
+                font-size: 1.3rem;
                 font-weight: 700;
+                letter-spacing: -0.01em;
             }
-            .bb-nav-left p {
-                color: #9ca3af;
-                margin: 2px 0 0 0;
-                font-size: 0.8rem;
+            .bb-nav-greeting {
+                color: var(--bb-text-muted, #64748B);
+                margin: 3px 0 0 0;
+                font-size: 0.88rem;
+                font-weight: 500;
+            }
+            .bb-nav-date {
+                color: #94A3B8;
+                margin: 1px 0 0 0;
+                font-size: 0.76rem;
             }
             .bb-nav-right {
                 display: flex;
                 align-items: center;
-                gap: 1.1rem;
+                gap: 1.2rem;
             }
             .bb-nav-icon {
                 position: relative;
-                font-size: 1.3rem;
-                color: #e5e7eb;
+                width: 40px; height: 40px;
+                border-radius: 12px;
+                background: var(--bb-bg-secondary, #F8FAFC);
+                border: 1px solid var(--bb-border, #E2E8F0);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 1.15rem;
                 cursor: default;
+                transition: background-color 0.15s ease, transform 0.15s ease;
+            }
+            .bb-nav-icon:hover {
+                background: #EEF2FF;
+                transform: translateY(-1px);
             }
             .bb-nav-badge {
                 position: absolute;
-                top: -6px;
-                right: -10px;
-                background: #ef4444;
+                top: -4px;
+                right: -4px;
+                background: var(--bb-danger, #EF4444);
                 color: white;
-                font-size: 0.65rem;
+                font-size: 0.62rem;
                 font-weight: 700;
                 border-radius: 999px;
-                padding: 1px 6px;
+                padding: 1px 5px;
+                border: 2px solid #FFFFFF;
             }
             .bb-nav-avatar {
-                width: 38px;
-                height: 38px;
+                width: 40px;
+                height: 40px;
                 border-radius: 50%;
-                background: linear-gradient(135deg, #2563eb, #7c3aed);
+                background: linear-gradient(135deg, var(--bb-primary, #6366F1), var(--bb-accent, #8B5CF6));
                 color: #ffffff;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-weight: 700;
                 font-size: 0.85rem;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            }
+
+            @media (max-width: 640px) {
+                .bb-navbar { flex-direction: column; align-items: flex-start; gap: 12px; padding: 1rem 1.1rem; }
+                .bb-nav-right { align-self: flex-end; }
             }
         </style>
         """,
@@ -113,7 +152,8 @@ def render_navbar(page_title="Dashboard", user_name="Guest", notifications_count
         <div class="bb-navbar">
             <div class="bb-nav-left">
                 <h3>{page_title}</h3>
-                <p>📅 {today_str}</p>
+                <p class="bb-nav-greeting">{greeting}</p>
+                <p class="bb-nav-date">📅 {today_str}</p>
             </div>
             <div class="bb-nav-right">
                 <div class="bb-nav-icon">

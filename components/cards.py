@@ -28,11 +28,11 @@ from utils.helpers import format_currency
 # ----------------------------------------------------------------------------
 
 _CARD_THEMES = {
-    "budget":    {"accent": "#2563eb", "badge_bg": "rgba(37, 99, 235, 0.12)"},
-    "expense":   {"accent": "#dc2626", "badge_bg": "rgba(220, 38, 38, 0.12)"},
-    "remaining": {"accent": "#0891b2", "badge_bg": "rgba(8, 145, 178, 0.12)"},
-    "savings":   {"accent": "#16a34a", "badge_bg": "rgba(22, 163, 74, 0.12)"},
-    "count":     {"accent": "#7c3aed", "badge_bg": "rgba(124, 58, 237, 0.12)"},
+    "budget":    {"accent": "#6366F1", "badge_bg": "rgba(99, 102, 241, 0.12)"},   # primary indigo
+    "expense":   {"accent": "#EF4444", "badge_bg": "rgba(239, 68, 68, 0.12)"},    # danger
+    "remaining": {"accent": "#8B5CF6", "badge_bg": "rgba(139, 92, 246, 0.12)"},   # accent purple
+    "savings":   {"accent": "#22C55E", "badge_bg": "rgba(34, 197, 94, 0.12)"},    # success
+    "count":     {"accent": "#F59E0B", "badge_bg": "rgba(245, 158, 11, 0.12)"},   # warning
 }
 
 

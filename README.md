@@ -1,171 +1,160 @@
 # 💰 BudgetBuddy AI
 
-**BudgetBuddy AI** is an intelligent personal finance management application built using **Streamlit**, **SQLite**, and **Groq AI**. It helps students track their expenses, manage their monthly budget, analyze their spending habits, and receive personalized financial advice through an AI-powered assistant.
+**BudgetBuddy AI** is an AI-powered personal expense tracker built for university students. It helps users manage their finances, monitor spending habits, generate insightful analytics, receive AI-powered financial advice, and interact with an intelligent budgeting assistant.
+
+🌐 **Live Demo:**  
+https://budgetbuddyaigit-6kzawsvdhrdc7jo6mszwhu.streamlit.app/
+
+📂 **GitHub Repository:**  
+https://github.com/SidraPervaiz1122/BudgetBuddyAI
 
 ---
 
 # 📌 Problem Statement
 
-Many university students struggle to manage their monthly expenses. They often lose track of where their money is spent, making it difficult to save or stay within budget.
+Many university students struggle to manage their monthly budgets and often lose track of where their money goes. Existing budgeting applications are either too complicated or lack intelligent guidance.
 
-BudgetBuddy AI solves this problem by providing an easy-to-use platform where students can:
-
-* Manage their monthly budget
-* Record daily expenses
-* Analyze spending habits
-* View insightful reports
-* Receive personalized AI financial guidance
-
----
-
-# 🎯 Target Users
-
-* University Students
-* Hostel Students
-* Fresh Graduates
-* Anyone who wants a simple personal expense manager
-
----
-
-# 🚀 Live Demo
-
-🔗 **Live App:**
-https://budgetbuddyaigit-6kzawsvdhrdc7jo6mszwhu.streamlit.app/
-
-
----
-
-# 💻 GitHub Repository
-
-🔗 **GitHub Repository:**
-https://github.com/SidraPervaiz1122/BudgetBuddyAI
+BudgetBuddy AI solves this by providing a simple expense management platform enhanced with AI that analyzes spending patterns and provides personalized budgeting recommendations.
 
 ---
 
 # ✨ Features
 
-## 👤 User Authentication
+## 🔐 User Authentication
 
-* Secure Signup
-* Secure Login
-* User-specific data
-* Session Management
-
----
-
-## 💰 Budget Management
-
-* Set Monthly Budget
-* Update Budget
-* Add Money to Existing Budget
-* Remaining Budget Calculation
-* Budget Persistence using SQLite
+- User Registration
+- Secure Login
+- Logout
+- Forgot Password via Email OTP
+- Password Reset
+- Session Management
 
 ---
 
-## 💸 Expense Management
+## 💵 Budget Management
 
-Users can
-
-* Add Expenses
-* Edit Expenses
-* Delete Expenses
-* Categorize Expenses
-* Add Description
-* Store Date
-
-Categories include:
-
-* Food
-* Transport
-* Shopping
-* Education
-* Entertainment
-* Bills
-* Healthcare
-* Others
+- Add Monthly Budget
+- Update Budget
+- Remaining Budget Calculation
+- Total Spending Calculation
+- Budget Overview Cards
 
 ---
 
-## 📊 Dashboard
+## 📝 Expense Management
 
-Interactive dashboard showing:
-
-* Monthly Budget
-* Total Expenses
-* Remaining Budget
-* Savings Percentage
-* Recent Transactions
-
----
-
-## 📈 Analytics
-
-Visual insights including:
-
-* Spending by Category
-* Monthly Expense Distribution
-* Expense Trends
-* Financial Summary
+- Add Expenses
+- Edit Budget
+- Categorize Expenses
+- Transaction History
+- Interactive Expense Table
+- Search Expenses
+- Category Filtering
 
 ---
 
-## 🤖 AI Chat Assistant
+## 📊 Analytics Dashboard
 
-BudgetBuddy AI includes a conversational AI assistant powered by **Groq**.
-
-The AI can answer questions such as:
-
-* How can I save more money?
-* Where am I overspending?
-* Analyze my expenses.
-* Suggest a better monthly budget.
-* Give me financial tips.
-
-The AI uses the logged-in user's actual spending data to generate personalized responses.
+- Spending Overview
+- Category-wise Expense Analysis
+- Monthly Spending Insights
+- Responsive Charts
+- Spending Statistics
+- Interactive Visualizations
 
 ---
 
-## 🧠 AI Financial Advisor
+## 🤖 AI Advisor
 
-The AI Advisor analyzes:
+BudgetBuddy AI analyzes the user's actual spending history and provides personalized financial advice.
 
-* Monthly Budget
-* Remaining Budget
-* Spending Categories
-* Recent Expenses
-* Total Spending
+Examples:
 
-Then generates personalized financial recommendations to help users improve their budgeting habits.
-
----
-
-## 📄 Smart Reports
-
-Generate financial reports containing:
-
-* Budget Summary
-* Expense Summary
-* Spending Categories
-* AI Generated Financial Insights
-
-Reports can also be exported.
+- Spending habit analysis
+- Saving recommendations
+- Budget improvement suggestions
+- Category-wise financial insights
 
 ---
 
-## 💾 Persistent Database
+## 💬 AI Chat Assistant
 
-The application stores:
+Users can freely chat with the AI assistant.
 
-* User Accounts
-* Monthly Budgets
-* Expenses
-* Categories
-* AI Context
+Examples:
 
-using **SQLite**.
+- How can I save more money?
+- Is my spending healthy?
+- How should I divide my monthly budget?
+- Budgeting tips
+- Student financial guidance
 
-Data remains available after logout and login.
+---
+
+## 📄 Reports
+
+Generate professional reports containing:
+
+- Total Spending
+- Budget Summary
+- Category Breakdown
+- Financial Overview
+- AI-generated Summary
+
+---
+
+## 📱 Responsive UI
+
+The application automatically adapts to:
+
+- Desktop
+- Laptop
+- Tablet
+- Mobile Devices
+
+---
+
+# 🧠 AI Feature
+
+BudgetBuddy AI includes two AI-powered modules:
+
+## 1. AI Advisor
+
+Analyzes real expense history and generates personalized budgeting advice.
+
+## 2. AI Chat
+
+Allows users to ask financial questions naturally.
+
+Example:
+
+> "How can I reduce my monthly expenses?"
+
+The AI responds based on the user's spending history.
+
+---
+
+# 📝 AI System Prompt
+
+```
+You are BudgetBuddy AI.
+
+You are an expert financial advisor for university students.
+
+Analyze spending habits.
+
+Identify unnecessary spending.
+
+Suggest realistic saving strategies.
+
+Be encouraging.
+
+Keep responses concise.
+
+Never recommend risky investments.
+
+Focus on budgeting, saving money, and improving financial habits.
+```
 
 ---
 
@@ -173,76 +162,29 @@ Data remains available after logout and login.
 
 ## Frontend
 
-* Streamlit
-* HTML
-* CSS
-
----
+- Streamlit
+- HTML
+- CSS
 
 ## Backend
 
-* Python
-
----
+- Python
 
 ## Database
 
-* SQLite
+- SQLite
 
----
+## AI Model
 
-## AI
-
-* Groq API
-* Llama 3.3 70B Versatile
-
----
+- Groq LLM
 
 ## Libraries
 
-* Streamlit
-* SQLite3
-* Pandas
-* Plotly
-* bcrypt
-* ReportLab
-* Groq
-
----
-
-# 🧠 AI Feature
-
-BudgetBuddy AI includes an intelligent financial assistant powered by **Groq**.
-
-The assistant receives:
-
-* User Budget
-* Remaining Budget
-* Spending Categories
-* Recent Expenses
-* Total Spending
-
-and generates personalized financial guidance.
-
-### System Prompt
-
-```
-You are BudgetBuddy AI.
-
-You are an expert financial advisor for university students.
-
-Analyze the user's spending habits.
-
-Identify unnecessary expenses.
-
-Suggest realistic saving strategies.
-
-Be friendly, supportive, and practical.
-
-Never recommend risky investments.
-
-Keep responses concise and personalized using the user's financial data.
-```
+- Pandas
+- Plotly
+- bcrypt
+- ReportLab
+- Streamlit
 
 ---
 
@@ -250,106 +192,50 @@ Keep responses concise and personalized using the user's financial data.
 
 ```
 BudgetBuddyAI/
-
 │
-├── app.py
-│
+├── assets/
 ├── components/
-│   ├── sidebar.py
-│   ├── navbar.py
-│   └── cards.py
-│
+├── database/
 ├── pages/
 │   ├── login.py
 │   ├── signup.py
+│   ├── forgot_password.py
 │   ├── dashboard.py
 │   ├── add_expense.py
 │   ├── analytics.py
 │   ├── ai_advisor.py
 │   ├── ai_chat.py
-│   └── reports.py
-│
-├── database/
-│   └── db.py
+│   ├── reports.py
 │
 ├── utils/
-│   └── helpers.py
-│
-├── assets/
-│
-├── .streamlit/
-│   └── secrets.toml
-│
+├── app.py
 ├── requirements.txt
-│
-└── README.md
+├── README.md
 ```
 
 ---
 
-# 📸 Screenshots
-
-Add at least three screenshots.
-
-### Login Page
-
-```
-images/login.png
-```
-
-### Dashboard
-
-```
-images/dashboard.png
-```
-
-### Analytics
-
-```
-images/analytics.png
-```
-
-### AI Advisor
-
-```
-images/ai_advisor.png
-```
-
-### AI Chat
-
-```
-images/ai_chat.png
-```
-
-### Reports
-
-```
-images/report.png
-```
-
----
-
-# ⚙ Installation
+# 🚀 Installation
 
 Clone the repository
 
 ```bash
-git clone <https://github.com/SidraPervaiz1122/BudgetBuddyAI>
+git clone https://github.com/SidraPervaiz1122/BudgetBuddyAI.git
 ```
 
-Move inside the project
+Move into the project
 
 ```bash
 cd BudgetBuddyAI
 ```
 
-Create a virtual environment
+Create virtual environment
 
 ```bash
 python -m venv venv
 ```
 
-Activate the virtual environment
+Activate environment
 
 Windows
 
@@ -369,45 +255,44 @@ Create
 .streamlit/secrets.toml
 ```
 
-Add your Groq API key
-
-```
-GROQ_API_KEY="YOUR_API_KEY"
-```
-
-Run the application
+Run
 
 ```bash
 streamlit run app.py
 ```
 
----
+### Reports
 
-# 📖 Future Improvements
-
-* Dark/Light Theme Toggle
-* Budget Notifications
-* Monthly Saving Goals
-* Email Reports
-* Receipt OCR
-* Multi-Currency Support
-* Cloud Database Integration
-* Mobile Application
+![Reports](images/report.png)
 
 ---
 
-# 👩‍💻 Developed By
+# 🎯 Future Improvements
+
+- Multi-currency support
+- Export to Excel
+- Email monthly expense reports
+- Dark / Light mode
+- Expense reminders
+- Goal-based savings tracker
+- Cloud database integration
+- Multi-device synchronization
+
+---
+
+# 👩‍💻 Author
 
 **Sidra Pervaiz**
 
-BS Computer and Information Sciences
+BS Computer & Information Sciences
 
 Pakistan Institute of Engineering and Applied Sciences (PIEAS)
 
+GitHub:
+https://github.com/SidraPervaiz1122
+
 ---
 
-# 📜 License
+# 📄 License
 
-This project was developed for educational purposes as a university final project.
-
-© 2026 BudgetBuddy AI. All rights reserved.
+This project is developed for educational purposes as the Final AI App Project.

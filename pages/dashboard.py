@@ -25,7 +25,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-
 from database.db import set_user_budget, add_to_user_budget
 from utils.helpers import (
     format_currency,
@@ -112,13 +111,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-# ----------------------------------------------------------------------------
-# Welcome header + date
-# ----------------------------------------------------------------------------
-
-st.markdown(f"### 👋 Welcome back, {user_name}!")
-st.caption(f"📅 {date.today().strftime('%A, %d %B %Y')}")
 
 # ----------------------------------------------------------------------------
 # Monthly budget control - set an exact amount, or top up what's there

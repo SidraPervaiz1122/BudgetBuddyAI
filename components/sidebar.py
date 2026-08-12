@@ -60,8 +60,9 @@ def render_sidebar(active_page="Dashboard"):
         """
         <style>
             section[data-testid="stSidebar"] {
-                background: linear-gradient(180deg, #0b0f19 0%, #0a0e1a 100%) !important;
+                background: linear-gradient(180deg, #0F172A 0%, #0B1120 100%) !important;
                 border-right: 1px solid rgba(255, 255, 255, 0.06);
+                backdrop-filter: blur(12px);
             }
 
             section[data-testid="stSidebar"] * {
@@ -112,7 +113,7 @@ def render_sidebar(active_page="Dashboard"):
             .bb-user-avatar {
                 width: 38px; height: 38px; flex-shrink: 0;
                 border-radius: 50%;
-                background: linear-gradient(135deg, #2563eb, #7c3aed);
+                background: linear-gradient(135deg, #6366F1, #8B5CF6);
                 color: #ffffff !important;
                 display: flex; align-items: center; justify-content: center;
                 font-weight: 700; font-size: 0.85rem;
@@ -152,7 +153,7 @@ def render_sidebar(active_page="Dashboard"):
                 font-size: 0.9rem !important;
                 font-weight: 500 !important;
                 box-sizing: border-box !important;
-                transition: all 0.15s ease-in-out;
+                transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
             }
 
             section[data-testid="stSidebar"] .stButton > button p {
@@ -166,6 +167,7 @@ def render_sidebar(active_page="Dashboard"):
             section[data-testid="stSidebar"] .stButton > button:hover {
                 background: rgba(255, 255, 255, 0.06) !important;
                 border-color: rgba(255, 255, 255, 0.08) !important;
+                transform: translateX(2px);
             }
             section[data-testid="stSidebar"] .stButton > button:hover p {
                 color: #ffffff !important;

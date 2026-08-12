@@ -52,6 +52,27 @@ def load_custom_css():
     st.markdown(
         """
         <style>
+            /* ================================================================
+               BudgetBuddy AI - Design Tokens
+               Single source of truth for the color system. Every other file
+               (sidebar, navbar, cards, charts) references these same hex
+               values so the whole app stays visually consistent.
+               ================================================================ */
+            :root {
+                --bb-sidebar: #0F172A;
+                --bb-bg: #FFFFFF;
+                --bb-bg-secondary: #F8FAFC;
+                --bb-card: #FFFFFF;
+                --bb-primary: #6366F1;
+                --bb-accent: #8B5CF6;
+                --bb-success: #22C55E;
+                --bb-warning: #F59E0B;
+                --bb-danger: #EF4444;
+                --bb-text: #1E293B;
+                --bb-text-muted: #64748B;
+                --bb-border: #E2E8F0;
+            }
+
             /* Hide Streamlit's default multipage nav - components/sidebar.py
                renders our own custom navigation instead. */
             div[data-testid="stSidebarNav"] {
@@ -60,6 +81,33 @@ def load_custom_css():
 
             html, body {
                 font-family: "Segoe UI", "Inter", sans-serif;
+                color: var(--bb-text);
+                background-color: var(--bb-bg);
+            }
+
+            .stApp { background-color: var(--bb-bg); }
+
+            /* IMPORTANT: color is only set on html/body above, and left to
+               inherit naturally from there. An explicit rule like
+               "h1, h2, h3 { color: ... }" or "p, span, label { color: ... }"
+               would look harmless, but explicit rules always override
+               inherited color regardless of specificity - which silently
+               breaks every custom dark card/button elsewhere in the app
+               (AI Advisor's advice card, Reports' buttons, dashboard Quick
+               Actions) that relies on inheriting white text from ITS OWN
+               dark background. Only set text color on a container that
+               also controls its own background, never as a blanket
+               element-type rule. */
+            h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em; }
+            h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.01em; }
+            h3 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+            .stCaption, [data-testid="stCaptionContainer"] { color: var(--bb-text-muted) !important; }
+
+            /* Consistent focus ring across every input, matching --bb-primary */
+            .stTextInput input:focus, .stNumberInput input:focus,
+            .stTextArea textarea:focus, .stSelectbox > div:focus-within {
+                border-color: var(--bb-primary) !important;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18) !important;
             }
 
             #MainMenu {visibility: hidden;}
@@ -112,6 +160,29 @@ def load_custom_css():
             /* Prevent any element from forcing horizontal scroll. */
             * { box-sizing: border-box; }
             img, .stPlotlyChart, .stDataFrame { max-width: 100%; }
+
+            /* st.metric's own container AND its label/value/delta clip
+               overflow with an ellipsis by default - on every page that
+               uses st.metric, not just Analytics. This forces all of them
+               to wrap instead of ever truncating with "...". */
+            div[data-testid="stMetric"] {
+                overflow: visible !important;
+                height: auto !important;
+            }
+            div[data-testid="stMetric"] * {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: unset !important;
+                word-break: break-word;
+                height: auto !important;
+            }
+            div[data-testid="stMetricValue"] {
+                font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            }
+
+            @media (max-width: 640px) {
+                div[data-testid="column"] { width: 100% !important; flex: 1 1 100% !important; }
+            }
 
             /* Buttons scale down slightly and stay full-width on small screens. */
             @media (max-width: 768px) {
