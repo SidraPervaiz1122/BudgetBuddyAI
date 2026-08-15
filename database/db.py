@@ -47,6 +47,11 @@ _EXPECTED_SCHEMA = {
         "expires_at": "TEXT NOT NULL DEFAULT ''",
         "attempts": "INTEGER NOT NULL DEFAULT 0",
     },
+    "login_attempts": {
+        "email": "TEXT PRIMARY KEY",
+        "failed_attempts": "INTEGER NOT NULL DEFAULT 0",
+        "locked_until": "TEXT",
+    },
 }
 
 
@@ -141,6 +146,14 @@ def create_tables():
                 )
             """)
 
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS login_attempts (
+                    email TEXT PRIMARY KEY,
+                    failed_attempts INTEGER NOT NULL DEFAULT 0,
+                    locked_until TEXT
+                )
+            """)
+
             conn.commit()
             _migrate_schema(conn)
             conn.commit()
@@ -181,12 +194,29 @@ def login_user(email, password):
     if not email or not password:
         return False, "Email and password are required.", None
 
+    email = email.strip().lower()
+
     try:
         with get_connection() as conn:
             cursor = conn.cursor()
+
+            cursor.execute(
+                "SELECT failed_attempts, locked_until FROM login_attempts WHERE email = ?",
+                (email,),
+            )
+            attempt_row = cursor.fetchone()
+
+            if attempt_row and attempt_row["locked_until"]:
+                try:
+                    locked_until_dt = datetime.fromisoformat(attempt_row["locked_until"])
+                    if datetime.utcnow() < locked_until_dt:
+                        return False, "Too many failed attempts. Please try again in a few minutes.", None
+                except (ValueError, TypeError):
+                    pass
+
             cursor.execute(
                 "SELECT id, name, email, password, monthly_budget FROM users WHERE email = ?",
-                (email.strip().lower(),),
+                (email,),
             )
             row = cursor.fetchone()
 
@@ -197,9 +227,12 @@ def login_user(email, password):
             try:
                 password_matches = bcrypt.checkpw(password.encode("utf-8"), stored_hash)
             except ValueError:
-                return False, "Incorrect password.", None
+                password_matches = False
 
             if password_matches:
+                cursor.execute("DELETE FROM login_attempts WHERE email = ?", (email,))
+                conn.commit()
+
                 user_data = {
                     "id": row["id"],
                     "name": row["name"],
@@ -208,6 +241,27 @@ def login_user(email, password):
                 }
                 return True, "Login successful.", user_data
             else:
+                current_failed = attempt_row["failed_attempts"] if attempt_row else 0
+                new_failed = current_failed + 1
+
+                if new_failed >= 5:
+                    locked_until_str = (datetime.utcnow() + timedelta(minutes=10)).isoformat()
+                    new_failed = 0
+                else:
+                    locked_until_str = None
+
+                cursor.execute(
+                    """
+                    INSERT INTO login_attempts (email, failed_attempts, locked_until)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(email) DO UPDATE SET
+                        failed_attempts = excluded.failed_attempts,
+                        locked_until = excluded.locked_until
+                    """,
+                    (email, new_failed, locked_until_str),
+                )
+                conn.commit()
+
                 return False, "Incorrect password.", None
 
     except sqlite3.Error as e:

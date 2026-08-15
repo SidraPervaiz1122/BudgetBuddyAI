@@ -261,6 +261,8 @@ Run
 streamlit run app.py
 ```
 
+> **Note:** The database file (`expenses.db`) is created automatically on first run via `create_tables()` in `database/db.py` — no manual setup needed.
+
 ### Reports
 
 ![Reports](images/report.png)
