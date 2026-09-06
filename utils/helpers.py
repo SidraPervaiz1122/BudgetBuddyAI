@@ -220,7 +220,8 @@ def get_groq_api_key():
 
 def ask_groq(prompt, system_instruction=""):
     """
-    Sends a prompt to the Groq API using llama-3.3-70b-versatile (with safe fallback to llama-3.1-8b-instant).
+    Sends a prompt to the Groq API using openai/gpt-oss-120b
+with a safe fallback to openai/gpt-oss-20b.
     Handles authentication, rate limits, network timeouts, and model errors securely.
     Ensures API keys remain server-side and raw tracebacks are never shown to users.
 
@@ -236,8 +237,7 @@ def ask_groq(prompt, system_instruction=""):
         messages.append({"role": "system", "content": system_instruction})
     messages.append({"role": "user", "content": prompt})
 
-    models_to_try = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-
+    models_to_try = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
     for idx, model_name in enumerate(models_to_try):
         try:
             client = Groq(api_key=api_key, timeout=25.0)
