@@ -109,7 +109,14 @@ def _migrate_schema(conn):
                 print(f"[DB MIGRATION ERROR] Could not add '{column_name}' to '{table_name}': {e}")
 
 
+_tables_initialized = False
+
+
 def create_tables():
+    global _tables_initialized
+    if _tables_initialized:
+        return True
+
     try:
         with get_connection() as conn:
             cursor = conn.cursor()
@@ -157,6 +164,7 @@ def create_tables():
             conn.commit()
             _migrate_schema(conn)
             conn.commit()
+            _tables_initialized = True
             return True
 
     except sqlite3.Error as e:
@@ -489,15 +497,15 @@ def add_expense(user_id, amount, category, description, date):
 
 
 def get_expense_by_id(expense_id, user_id=None):
+    if not user_id:
+        return None
+
     try:
         with get_connection() as conn:
             cursor = conn.cursor()
-            if user_id is not None:
-                cursor.execute(
-                    "SELECT * FROM expenses WHERE id = ? AND user_id = ?", (expense_id, user_id)
-                )
-            else:
-                cursor.execute("SELECT * FROM expenses WHERE id = ?", (expense_id,))
+            cursor.execute(
+                "SELECT * FROM expenses WHERE id = ? AND user_id = ?", (expense_id, user_id)
+            )
             row = cursor.fetchone()
             return dict(row) if row else None
 
@@ -507,6 +515,9 @@ def get_expense_by_id(expense_id, user_id=None):
 
 
 def update_expense(expense_id, amount=None, category=None, description=None, date=None, user_id=None):
+    if not user_id:
+        return False, "User ID is required to update an expense."
+
     fields = []
     values = []
 
@@ -535,15 +546,12 @@ def update_expense(expense_id, amount=None, category=None, description=None, dat
         return False, "No fields provided to update."
 
     values.append(expense_id)
+    values.append(user_id)
 
     try:
         with get_connection() as conn:
             cursor = conn.cursor()
-            query = f"UPDATE expenses SET {', '.join(fields)} WHERE id = ?"
-            if user_id is not None:
-                query += " AND user_id = ?"
-                values.append(user_id)
-
+            query = f"UPDATE expenses SET {', '.join(fields)} WHERE id = ? AND user_id = ?"
             cursor.execute(query, values)
             conn.commit()
 
@@ -556,16 +564,16 @@ def update_expense(expense_id, amount=None, category=None, description=None, dat
 
 
 def delete_expense(expense_id, user_id=None):
+    if not user_id:
+        return False, "User ID is required to delete an expense."
+
     try:
         with get_connection() as conn:
             cursor = conn.cursor()
-            if user_id is not None:
-                cursor.execute(
-                    "DELETE FROM expenses WHERE id = ? AND user_id = ?",
-                    (expense_id, user_id),
-                )
-            else:
-                cursor.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
+            cursor.execute(
+                "DELETE FROM expenses WHERE id = ? AND user_id = ?",
+                (expense_id, user_id),
+            )
             conn.commit()
 
             if cursor.rowcount == 0:

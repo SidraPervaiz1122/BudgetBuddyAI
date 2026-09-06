@@ -17,7 +17,14 @@ from datetime import date
 
 import streamlit as st
 
-from utils.helpers import load_budget, load_all_expenses, filter_by_date_range, compute_total, format_currency
+from utils.helpers import (
+    load_budget,
+    load_all_expenses,
+    filter_by_date_range,
+    compute_total,
+    format_currency,
+    clear_data_cache,
+)
 
 # ----------------------------------------------------------------------------
 # Navigation configuration
@@ -325,9 +332,11 @@ def render_sidebar(active_page="Dashboard"):
         # -- Logout -------------------------------------------------
         st.markdown('<div class="bb-logout">', unsafe_allow_html=True)
         if st.button("🚪    Logout", key="nav_logout"):
+            st.session_state.clear()
             st.session_state.logged_in = False
             st.session_state.user_id = None
             st.session_state.user_name = None
+            clear_data_cache()
             st.switch_page("pages/login.py")
         st.markdown("</div>", unsafe_allow_html=True)
 

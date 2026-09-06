@@ -30,6 +30,9 @@ if "user_id" not in st.session_state:
 if "user_name" not in st.session_state:
     st.session_state.user_name = None
 
+if st.session_state.get("logged_in"):
+    st.switch_page("pages/dashboard.py")
+
 
 # ----------------------------------------------------------------------------
 # Styling
@@ -98,6 +101,11 @@ st.markdown(
             box-shadow: none !important;
         }
         .secondary-btn button:hover { background: rgba(150, 150, 150, 0.15) !important; }
+
+        /* Hide "Press Enter to submit" helper text */
+        [data-testid="InputInstructions"] {
+            display: none !important;
+        }
     </style>
     """,
     unsafe_allow_html=True,

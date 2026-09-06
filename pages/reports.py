@@ -192,7 +192,7 @@ ai_summary_model = st.session_state.get("report_ai_summary_model")
 if ai_summary:
     st.info(ai_summary)
     if ai_summary_model:
-        st.caption(f"🔧 Generated using Gemini model: `{ai_summary_model}`")
+        st.caption(f"🔧 Generated using Groq model: `{ai_summary_model}`")
 
 st.divider()
 

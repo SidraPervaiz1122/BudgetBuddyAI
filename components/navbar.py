@@ -17,6 +17,18 @@ Usage:
 from datetime import datetime
 import streamlit as st
 
+try:
+    from zoneinfo import ZoneInfo
+    KARACHI_TZ = ZoneInfo("Asia/Karachi")
+except Exception:
+    from datetime import timezone, timedelta
+    KARACHI_TZ = timezone(timedelta(hours=5))
+
+
+def _get_karachi_now():
+    """Returns the current datetime in Asia/Karachi (UTC+5)."""
+    return datetime.now(KARACHI_TZ)
+
 
 def _get_initials(name):
     """Derives up to two uppercase initials from a user's full name."""
@@ -31,14 +43,22 @@ def _get_initials(name):
 
 
 def _get_greeting(name):
-    """Time-aware greeting, e.g. 'Good morning, Sidra 👋'."""
-    hour = datetime.now().hour
-    if hour < 12:
+    """
+    Time-aware greeting using Asia/Karachi timezone:
+    - 05:00–11:59 -> Good morning
+    - 12:00–16:59 -> Good afternoon
+    - 17:00–20:59 -> Good evening
+    - 21:00–04:59 -> Good night
+    """
+    hour = _get_karachi_now().hour
+    if 5 <= hour < 12:
         time_phrase = "Good morning"
-    elif hour < 17:
+    elif 12 <= hour < 17:
         time_phrase = "Good afternoon"
-    else:
+    elif 17 <= hour < 21:
         time_phrase = "Good evening"
+    else:
+        time_phrase = "Good night"
     first_name = (name or "there").strip().split(" ")[0]
     return f"{time_phrase}, {first_name} 👋"
 
@@ -52,7 +72,7 @@ def render_navbar(page_title="Dashboard", user_name="Guest", notifications_count
         user_name (str): Name of the logged-in user (used for the greeting/avatar).
         notifications_count (int): Number of unread notifications to badge.
     """
-    today_str = datetime.now().strftime("%A, %d %B %Y")
+    today_str = _get_karachi_now().strftime("%A, %d %B %Y")
     initials = _get_initials(user_name)
     greeting = _get_greeting(user_name)
 

@@ -6,6 +6,7 @@ BudgetBuddy AI - Helper Functions
 Contains formatting utilities, budget math, cached data loading, the AI
 backend integration, and the password-reset email sender.
 """
+import os
 import smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
@@ -197,44 +198,81 @@ def style_chart(fig, y_prefix="Rs. ", show_y_grid=True):
 # Groq AI Integration
 # ----------------------------------------------------------------------------
 
+def get_groq_api_key():
+    """
+    Safely retrieves the Groq API key from Streamlit secrets or environment variables.
+    Trims accidental quotes and whitespace. Server-side only.
+    """
+    key = None
+    try:
+        if hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
+            key = st.secrets["GROQ_API_KEY"]
+    except Exception:
+        pass
+
+    if not key:
+        key = os.environ.get("GROQ_API_KEY")
+
+    if key:
+        key = str(key).strip().strip('"').strip("'")
+    return key or None
+
+
 def ask_groq(prompt, system_instruction=""):
     """
-    Sends a prompt to the Groq API using the llama-3.3-70b-versatile model.
-    Handles network errors, rate limits, and missing API keys securely.
-    
+    Sends a prompt to the Groq API using llama-3.3-70b-versatile (with safe fallback to llama-3.1-8b-instant).
+    Handles authentication, rate limits, network timeouts, and model errors securely.
+    Ensures API keys remain server-side and raw tracebacks are never shown to users.
+
     Returns:
         tuple: (success (bool), response_text_or_error (str), model_name (str))
     """
-    api_key = st.secrets.get("GROQ_API_KEY")
-    
+    api_key = get_groq_api_key()
     if not api_key:
         return False, "⚠️ Groq API key not found. Please add GROQ_API_KEY to your .streamlit/secrets.toml file.", None
 
-    model_name = "llama-3.3-70b-versatile"
+    messages = []
+    if system_instruction:
+        messages.append({"role": "system", "content": system_instruction})
+    messages.append({"role": "user", "content": prompt})
 
-    try:
-        client = Groq(api_key=api_key)
-        
-        messages = []
-        if system_instruction:
-            messages.append({"role": "system", "content": system_instruction})
-        
-        messages.append({"role": "user", "content": prompt})
+    models_to_try = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
 
-        response = client.chat.completions.create(
-            model=model_name,
-            messages=messages,
-            temperature=0.7,
-        )
+    for idx, model_name in enumerate(models_to_try):
+        try:
+            client = Groq(api_key=api_key, timeout=25.0)
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=0.7,
+            )
 
-        if not response.choices or not response.choices[0].message.content:
-            return False, "⚠️ Received an empty response from Groq AI. Please try again.", None
+            if not response.choices or not response.choices[0].message.content:
+                return False, "⚠️ Received an empty response from Groq AI. Please try again.", None
 
-        return True, response.choices[0].message.content.strip(), model_name
+            return True, response.choices[0].message.content.strip(), model_name
 
-    except Exception as e:
-        # Broad catch for timeouts, rate limits, and network connection errors
-        return False, f"⚠️ Groq API Error: {str(e)}", None
+        except Exception as e:
+            err_str = str(e).lower()
+            # If the model was not found and we have a fallback model available, attempt fallback
+            if ("404" in err_str or "model_not_found" in err_str or "not found" in err_str) and idx < len(models_to_try) - 1:
+                print(f"[GROQ WARN] Model '{model_name}' unavailable, trying fallback '{models_to_try[idx + 1]}'...")
+                continue
+
+            # Log sanitized error message server-side only
+            print(f"[GROQ ERROR] Request failed for model {model_name}: {e}")
+
+            # Return user-friendly, safe error messages without raw exceptions or tracebacks
+            if "authentication" in err_str or "invalid_api_key" in err_str or "401" in err_str:
+                return False, "⚠️ Groq authentication failed. Please verify your GROQ_API_KEY.", None
+            elif "rate_limit" in err_str or "429" in err_str:
+                return False, "⚠️ Groq AI rate limit reached. Please wait a moment and try again.", None
+            elif "connection" in err_str or "timeout" in err_str:
+                return False, "⚠️ Could not connect to Groq AI service. Please check your network connection.", None
+            elif "404" in err_str or "model_not_found" in err_str:
+                return False, "⚠️ Requested AI model is currently unavailable on Groq. Please try again later.", None
+            else:
+                return False, "⚠️ AI service is temporarily unavailable. Please try again in a few moments.", None
 
 
 # ----------------------------------------------------------------------------

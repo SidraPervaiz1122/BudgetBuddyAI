@@ -38,6 +38,9 @@ from utils.helpers import send_reset_code_email
 
 st.set_page_config(page_title="Forgot Password | BudgetBuddy AI", page_icon="🔐", layout="centered")
 
+if st.session_state.get("logged_in"):
+    st.switch_page("pages/dashboard.py")
+
 
 # ----------------------------------------------------------------------------
 # Session state
@@ -110,6 +113,11 @@ st.markdown(
             box-shadow: none !important;
         }
         .secondary-btn button:hover { background: rgba(150, 150, 150, 0.15) !important; }
+
+        /* Hide "Press Enter to submit" helper text */
+        [data-testid="InputInstructions"] {
+            display: none !important;
+        }
     </style>
     """,
     unsafe_allow_html=True,

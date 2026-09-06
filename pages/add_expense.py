@@ -77,6 +77,10 @@ st.markdown(
             color: white;
             border: none;
         }
+        /* Hide "Press Enter to submit" helper text */
+        [data-testid="InputInstructions"] {
+            display: none !important;
+        }
     </style>
     """,
     unsafe_allow_html=True,

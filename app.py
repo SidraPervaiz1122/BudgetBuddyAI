@@ -113,6 +113,11 @@ def load_custom_css():
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
 
+            /* Hide Streamlit's default "Press Enter to submit" helper text */
+            [data-testid="InputInstructions"] {
+                display: none !important;
+            }
+
             /* Streamlit's own chrome icons (sidebar collapse arrow, expander
                toggle chevron, etc.) render as a literal ligature word like
                "keyboard_double_arrow_right" whenever the Material Symbols

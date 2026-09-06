@@ -18,6 +18,9 @@ from database.db import register_user
 
 st.set_page_config(page_title="Sign Up | BudgetBuddy AI", page_icon="💰", layout="centered")
 
+if st.session_state.get("logged_in"):
+    st.switch_page("pages/dashboard.py")
+
 EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
 
@@ -72,6 +75,11 @@ st.markdown(
             box-shadow: none !important;
         }
         .secondary-btn button:hover { background: rgba(150, 150, 150, 0.15) !important; }
+
+        /* Hide "Press Enter to submit" helper text */
+        [data-testid="InputInstructions"] {
+            display: none !important;
+        }
     </style>
     """,
     unsafe_allow_html=True,
